@@ -6,7 +6,7 @@ export default function Sidebar() {
     { name: "Movies", path: "/movies" },
     { name: "Genres", path: "/genres" },
     { name: "Add Movie", path: "/add-movie" },
-    { name: "Manage Catalogue", path: "/manage-catalogue" },
+    { name: "Manage Catalogue", path: "/catalogue" },
     { name: "GraphQL", path: "/graphql" },
   ];
 

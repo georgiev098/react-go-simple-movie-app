@@ -4,6 +4,13 @@ import Sidebar from "./components/Sidebar";
 import Movies from "./components/Movies";
 import Header from "./components/Header";
 import ErrorPage from "./components/ErrorPage";
+import Catalogue from "./components/Catalogue";
+import AddMovie from "./components/AddMovie";
+import Genres from "./components/Genres";
+import GraphQL from "./components/GraphQL";
+import Login from "./components/Login";
+import EditMovie from "./components/EditMovie";
+import Movie from "./components/Movie";
 
 function App() {
   return (
@@ -19,11 +26,14 @@ function App() {
         <main className="flex-1 p-8">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/movies" element={<Movies />} />
-            {/* <Route path="/genres" element={<Genres />} /> */}
-            {/* <Route path="/add-movie" element={<AddMovie />} /> */}
-            {/* <Route path="/manage-catalogue" element={<ManageCatalogue />} /> */}
-            {/* <Route path="/graphql" element={<GraphQLPage />} /> */}
+            <Route path="/movies/:id" element={<Movie />} />
+            <Route path="/genres" element={<Genres />} />
+            <Route path="/add-movie" element={<AddMovie />} />
+            <Route path="/edit-movie/:id" element={<EditMovie />} />
+            <Route path="/catalogue" element={<Catalogue />} />
+            <Route path="/graphql" element={<GraphQL />} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
           {/* END  Main Content */}
