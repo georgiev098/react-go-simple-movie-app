@@ -1,19 +1,23 @@
 import { Link } from "react-router-dom";
 
-export default function Sidebar() {
+export default function Sidebar({ jwtToken }) {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Movies", path: "/movies" },
-    { name: "Genres", path: "/genres" },
-    { name: "Add Movie", path: "/add-movie" },
-    { name: "Manage Catalogue", path: "/catalogue" },
-    { name: "GraphQL", path: "/graphql" },
+    { name: "Genres", path: "/genres", private: true },
+    { name: "Add Movie", path: "/add-movie", private: true },
+    { name: "Manage Catalogue", path: "/catalogue", private: true },
+    { name: "GraphQL", path: "/graphql", private: true },
   ];
+
+  const visibleNavItems = navItems.filter(
+    (item) => !item.private || jwtToken // only show private items if logged in
+  );
 
   return (
     <aside className="w-56 bg-white border-r shadow-sm">
       <nav className="flex flex-col p-4 space-y-2">
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
