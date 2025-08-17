@@ -1,11 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/georgiev098/simple-go-react-movie-app/internal/repo"
+	"github.com/georgiev098/simple-go-react-movie-app/internal/repo/dbrepo"
 )
 
 const port = 8080
@@ -13,7 +15,7 @@ const port = 8080
 type application struct {
 	Domain string
 	DSN    string
-	DB     *sql.DB
+	DB     repo.DBRepo
 }
 
 func main() {
@@ -27,7 +29,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app.DB = conn
+	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
+
+	defer app.DB.Connection().Close()
 
 	log.Println("Starting server on port:", port)
 
