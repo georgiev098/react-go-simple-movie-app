@@ -19,13 +19,34 @@ function App() {
   const [jwtToken, setJwtToken] = useState(null);
 
   function onLogin({ email, password }) {
-    if (email === "test@mail.com" && password === "test") {
-      const fakeToken = "fake-jwt-token-123456";
-      setJwtToken(fakeToken);
-      navigate("/");
-    } else {
-      alert("Invalid credentials");
-    }
+    // build request payload
+    let payload = {
+      email,
+      password,
+    };
+
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    };
+
+    fetch(`http://localhost:8080/auth`, requestOptions)
+      .then((resp) => resp.json())
+      .then((data) => {
+        if (data.error) {
+          alert(data.message);
+        } else {
+          setJwtToken(data.access_token);
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        alert(err);
+      });
   }
 
   return (

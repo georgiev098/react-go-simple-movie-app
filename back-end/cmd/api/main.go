@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/georgiev098/simple-go-react-movie-app/internal/repo"
 	"github.com/georgiev098/simple-go-react-movie-app/internal/repo/dbrepo"
@@ -13,16 +14,25 @@ import (
 const port = 8080
 
 type application struct {
-	Domain string
-	DSN    string
-	DB     repo.DBRepo
+	Domain       string
+	DSN          string
+	DB           repo.DBRepo
+	Auth         Auth
+	JWTSecret    string
+	JWTIssuer    string
+	JWTAudience  string
+	CookieDomain string
 }
 
 func main() {
 	var app application
-	app.Domain = "example.com"
 
 	flag.StringVar(&app.DSN, "dsn", "host=host.docker.internal port=5432 user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC connect_timeout=5", "Postgres Connection String")
+	flag.StringVar(&app.JWTSecret, "jwt-secret", "verysecret", "signing secret")
+	flag.StringVar(&app.JWTIssuer, "jwt-issuer", "example.com", "signing issuer")
+	flag.StringVar(&app.JWTAudience, "jwt-audience", "example.com", "signing audience")
+	flag.StringVar(&app.CookieDomain, "cookie-domain", "localhost", "cookie domain")
+	flag.StringVar(&app.Domain, "domain", "example.com", "domain")
 	flag.Parse()
 
 	conn, err := app.connectToDB()
@@ -32,6 +42,17 @@ func main() {
 	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
 
 	defer app.DB.Connection().Close()
+
+	app.Auth = Auth{
+		Issuer:        app.JWTIssuer,
+		Audience:      app.JWTAudience,
+		Secret:        app.JWTSecret,
+		TokenExpiry:   time.Minute * 15,
+		RefreshExpiry: time.Hour * 24,
+		CookiePath:    "/",
+		CookieName:    "__Host-refresh_token",
+		CookieDomain:  app.CookieDomain,
+	}
 
 	log.Println("Starting server on port:", port)
 
