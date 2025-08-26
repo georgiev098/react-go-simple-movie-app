@@ -3,7 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 export default function Header({ jwtToken, setJwtToken }) {
   const navigate = useNavigate();
   function handleLogOut() {
-    setJwtToken(null);
+    const reqOptions = {
+      method: "GET",
+      credentials: "include",
+    };
+
+    fetch(`http://localhost:8080/logout`, reqOptions)
+      .catch((err) => {
+        console.log("error logging out", err);
+      })
+      .finally(() => {
+        setJwtToken(null);
+      });
     navigate("/");
   }
 

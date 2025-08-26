@@ -11,7 +11,7 @@ import GraphQL from "./components/GraphQL";
 import Login from "./components/Login";
 import EditMovie from "./components/EditMovie";
 import Movie from "./components/Movie";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -49,6 +49,29 @@ function App() {
       });
   }
 
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/refresh", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Not logged in");
+
+        const data = await res.json();
+        if (data.access_token) {
+          setJwtToken(data.access_token);
+        }
+      } catch (err) {
+        setJwtToken(null);
+        console.log("User not logged in", err);
+      }
+    };
+
+    checkLogin();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
@@ -70,7 +93,10 @@ function App() {
               <Route path="/movies/:id" element={<Movie />} />
               <Route path="/add-movie" element={<AddMovie />} />
               <Route path="/edit-movie/:id" element={<EditMovie />} />
-              <Route path="/catalogue" element={<Catalogue />} />
+              <Route
+                path="/catalogue"
+                element={<Catalogue jwtToken={jwtToken} />}
+              />
               <Route path="/graphql" element={<GraphQL />} />
             </Route>
             {/* END Private Routes */}

@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"net/http"
+	"strconv"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
@@ -72,4 +75,67 @@ func (app *application) Authenticate(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, refreshCookie)
 
 	app.writeJSON(w, http.StatusAccepted, tokens)
+}
+
+func (app *application) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	for _, cookie := range r.Cookies() {
+		if cookie.Name == app.Auth.CookieName {
+			claims := &Claims{}
+			refreshToken := cookie.Value
+
+			// parse token to get claim
+			_, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (any, error) {
+				return app.JWTSecret, nil
+			})
+
+			if err != nil {
+				app.errorJSON(w, errors.New("unautherized"), http.StatusUnauthorized)
+				return
+			}
+
+			// get user id from token claims
+			userId, err := strconv.Atoi(claims.Subject)
+			if err != nil {
+				app.errorJSON(w, errors.New("unknown user"), http.StatusUnauthorized)
+				return
+			}
+
+			user, err := app.DB.GetUserByID(userId)
+			if err != nil {
+				app.errorJSON(w, errors.New("unknown user"), http.StatusUnauthorized)
+				return
+			}
+
+			u := jwtUser{
+				ID:        user.ID,
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
+			}
+
+			tokenPairs, err := app.Auth.GenerateTokenPair(&u)
+			if err != nil {
+				app.errorJSON(w, errors.New("error generating tokens"), http.StatusUnauthorized)
+				return
+			}
+
+			http.SetCookie(w, app.Auth.GetRefreshCookie(tokenPairs.RefreshToken))
+
+			app.writeJSON(w, http.StatusOK, tokenPairs)
+		}
+
+	}
+}
+
+func (app *application) LogOut(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, app.Auth.GetExpiredRefreshCookie())
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func (app *application) MovieCatalogue(w http.ResponseWriter, r *http.Request) {
+	movies, err := app.DB.AllMovies()
+	if err != nil {
+		app.errorJSON(w, err)
+	}
+
+	_ = app.writeJSON(w, http.StatusOK, movies)
 }
