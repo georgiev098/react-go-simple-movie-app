@@ -30,7 +30,7 @@ const tempMovies = [
 ];
 
 export default function Movies() {
-  const [movies, setMovies] = useState(tempMovies);
+  const [movies, setMovies] = useState([]);
 
   useEffect(() => {
     const headers = new Headers();

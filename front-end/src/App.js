@@ -87,17 +87,24 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login onLogin={onLogin} />} />
             <Route path="/movies" element={<Movies />} />
+            <Route path="/movies/:id" element={<Movie />} />
+
             {/* Private Routes */}
             <Route element={<PrivateRoute isAuthenticated={jwtToken} />}>
-              <Route path="/genres" element={<Genres />} />
-              <Route path="/movies/:id" element={<Movie />} />
-              <Route path="/add-movie" element={<AddMovie />} />
-              <Route path="/edit-movie/:id" element={<EditMovie />} />
+              <Route path="/admin/genres" element={<Genres />} />
               <Route
-                path="/catalogue"
+                path="/admin/add-movie"
+                element={<AddMovie jwtToken={jwtToken} />}
+              />
+              <Route
+                path="/admin/movies/:id"
+                element={<EditMovie jwtToken={jwtToken} />}
+              />
+              <Route
+                path="/admin/catalogue"
                 element={<Catalogue jwtToken={jwtToken} />}
               />
-              <Route path="/graphql" element={<GraphQL />} />
+              <Route path="/admin/graphql" element={<GraphQL />} />
             </Route>
             {/* END Private Routes */}
             <Route path="*" element={<ErrorPage />} />

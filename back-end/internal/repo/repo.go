@@ -11,4 +11,6 @@ type DBRepo interface {
 	Connection() *sql.DB
 	GetUserByEmail(email string) (*models.User, error)
 	GetUserByID(id int) (*models.User, error)
+	EditMovie(id int) (*models.Movie, []*models.Genre, error)
+	GetMovieById(id int) (*models.Movie, error)
 }
