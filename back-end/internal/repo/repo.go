@@ -13,4 +13,6 @@ type DBRepo interface {
 	GetUserByID(id int) (*models.User, error)
 	EditMovie(id int) (*models.Movie, []*models.Genre, error)
 	GetMovieById(id int) (*models.Movie, error)
+	AllGenres() ([]*models.Genre, error)
+	AddMovie(movie models.Movie) (int, error)
 }

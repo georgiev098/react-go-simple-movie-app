@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Input from "./form/Input";
 import Select from "./form/Select";
 import TextArea from "./form/TextArea";
+import CheckBox from "./form/CheckBox";
 
 export default function EditMovie({ jwtToken }) {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ export default function EditMovie({ jwtToken }) {
     runtime: "",
     mpaa_rating: "",
     description: "",
+    genres: [],
+    genres_array: [Array(13).fill(false)],
   });
 
   let { id } = useParams();
@@ -50,11 +53,89 @@ export default function EditMovie({ jwtToken }) {
       navigate("/login");
       return;
     }
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions = {
+      method: "GET",
+      headers,
+    };
+
+    const getGenres = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/genres`, requestOptions);
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const data = await res.json();
+        const checks = [];
+        data.forEach((element) => {
+          checks.push({
+            id: element.id,
+            checked: false,
+            genre: element.genre,
+          });
+        });
+
+        setMovie((m) => ({
+          ...m,
+          genres: checks,
+          genres_array: [],
+        }));
+      } catch (err) {
+        console.error("Error fetching movies:", err);
+      }
+    };
+
+    getGenres();
   }, [jwtToken, navigate]);
 
   const hasError = (key) => errors.indexOf(key) !== -1;
+
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    let errors = [];
+    let required = [
+      {
+        field: movie.title,
+        name: "title",
+      },
+      {
+        field: movie.release_date,
+        name: "release_date",
+      },
+      {
+        field: movie.runtime,
+        name: "runtime",
+      },
+      {
+        field: movie.description,
+        name: "description",
+      },
+      {
+        field: movie.mpaa_rating,
+        name: "mpaa_rating",
+      },
+    ];
+
+    required.forEach((req) => {
+      if (req.field === "") {
+        errors.push(req.name);
+      }
+    });
+
+    if (movie.genres_array.length === 0) {
+      alert("You must choose at least one genre.");
+      errors.push("genres");
+    }
+
+    setErrors(errors);
+
+    if (errors.length > 0) {
+      return false;
+    }
   };
 
   const handleChange = (event) => {
@@ -67,6 +148,25 @@ export default function EditMovie({ jwtToken }) {
     });
   };
 
+  const handleCheck = (event, index) => {
+    console.log("handle check called", event.target.value, index);
+
+    let temp = movie.genres;
+
+    temp[index].checked = !temp[index].checked;
+
+    let tempIDs = movie.genres_array;
+    if (!event.target.checked) {
+      tempIDs.splice(tempIDs.indexOf(event.target.value));
+    } else {
+      tempIDs.push(parseInt(event.target.value, 10));
+    }
+
+    setMovie({
+      ...movie,
+      genres_array: tempIDs,
+    });
+  };
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-700 mb-6">Edit Movie</h2>
@@ -76,7 +176,7 @@ export default function EditMovie({ jwtToken }) {
           title={"Title"}
           type={"text"}
           name={"title"}
-          value={movie.value}
+          value={movie.title}
           onChange={handleChange}
           errorDiv={hasError("title") ? "mt-2 text-sm text-red-600" : ""}
           errorMsg={hasError("title") ? "Please enter a title." : ""}
@@ -108,6 +208,7 @@ export default function EditMovie({ jwtToken }) {
           title={"MPAA Rating"}
           name={"mpaa_rating"}
           options={mpaaOptions}
+          value={movie.mpaa_rating}
           onChange={handleChange}
           placeHolder={"Choose"}
           errorMsg={
@@ -127,6 +228,35 @@ export default function EditMovie({ jwtToken }) {
             hasError("description") ? "Please enter a description." : ""
           }
         />
+
+        <h3>Genres</h3>
+
+        {movie.genres && movie.genres.length > 1 && (
+          <>
+            {Array.from(movie.genres).map((genre, index) => {
+              return (
+                <CheckBox
+                  title={genre.genre}
+                  name={"genre"}
+                  key={index}
+                  id={"genre-" + index}
+                  onChange={(e) => handleCheck(e, index)}
+                  value={genre.id}
+                  checked={movie.genres[index].checked}
+                />
+              );
+            })}
+          </>
+        )}
+
+        <hr />
+
+        <button
+          type="submit"
+          className="text-white mt-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+        >
+          Save
+        </button>
       </form>
     </div>
   );

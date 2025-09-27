@@ -3,38 +3,7 @@ import { useParams, Link } from "react-router-dom";
 
 export default function Movie() {
   const { id } = useParams(); // Get movie ID from the URL
-  const [movie, setMovie] = useState(null);
-
-  // // Temporary movie data (same as Movies.jsx)
-  // const tempMovies = [
-  //   {
-  //     id: 1,
-  //     title: "Inception",
-  //     release_date: "2010-07-16",
-  //     mpaa_rating: "PG-13",
-  //     description:
-  //       "A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea into a CEO's mind.",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "The Matrix",
-  //     release_date: "1999-03-31",
-  //     mpaa_rating: "R",
-  //     description:
-  //       "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Interstellar",
-  //     release_date: "2014-11-07",
-  //     mpaa_rating: "PG-13",
-  //     description:
-  //       "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-  //   },
-  // ];
-
-  // // Find the movie that matches the ID from the URL
-  // const movie = tempMovies.find((m) => m.id === Number(id));
+  const [movie, setMovie] = useState({});
 
   useEffect(() => {
     const headers = new Headers();
@@ -64,6 +33,13 @@ export default function Movie() {
     fetchMovie();
   }, [id]);
 
+  if (movie.genres) {
+    movie.genres = Object.values(movie.genres);
+    console.log("11111", movie);
+  } else {
+    movie.genres = [];
+  }
+
   // If movie not found
   if (!movie) {
     return (
@@ -88,6 +64,21 @@ export default function Movie() {
       <p className="text-gray-500 mb-4">
         <span className="font-medium">Rating:</span> {movie.mpaa_rating}
       </p>
+      {movie.genres.map((g) => {
+        return (
+          <span key={g.id} className="bg bg-gray-400 m-2 px-2 py-1 rounded m-3">
+            {g.genre}
+          </span>
+        );
+      })}
+      {movie.image !== "" && (
+        <div className="m-3">
+          <img
+            src={`https://image.tmdb.org/t/p/w200/${movie.image}`}
+            alt="poster"
+          />
+        </div>
+      )}
       <p className="text-gray-700 mb-6">{movie.description}</p>
 
       <Link

@@ -22,11 +22,13 @@ func (app *application) routes() http.Handler {
 	mux.Get("/refresh", app.RefreshToken)
 	mux.Get("/logout", app.LogOut)
 	mux.Get("/movies/{id}", app.GetMovieById)
+	mux.Get("/genres", app.AllGenres)
 
 	mux.Route("/admin", func(mux chi.Router) {
 		mux.Use(app.authRequired)
 		mux.Get("/movies", app.MovieCatalogue)
 		mux.Get("/movies/{id}", app.EditMovie)
+		mux.Put("/movies", app.AddMovie)
 	})
 	return mux
 }

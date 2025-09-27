@@ -1,4 +1,4 @@
-const CheckBox = (props) => {
+export default function CheckBox(props) {
   return (
     <div className="flex items-center space-x-2">
       {/* Checkbox input */}
@@ -21,6 +21,4 @@ const CheckBox = (props) => {
       </label>
     </div>
   );
-};
-
-export default CheckBox;
+}
