@@ -7,7 +7,7 @@ import CheckBox from "./form/CheckBox";
 
 export default function AddMovie({ jwtToken }) {
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [errors, setErrors] = useState([]);
   const [movie, setMovie] = useState({
     id: 0,
@@ -76,11 +76,11 @@ export default function AddMovie({ jwtToken }) {
           });
         });
 
-        setMovie({
-          ...movie,
+        setMovie((prevMovie) => ({
+          ...prevMovie,
           genres: checks,
           genres_array: [],
-        });
+        }));
       } catch (err) {
         console.error("Error fetching movies:", err);
       }
@@ -91,47 +91,134 @@ export default function AddMovie({ jwtToken }) {
 
   const hasError = (key) => errors.indexOf(key) !== -1;
 
-  const handleSubmit = (event) => {
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
+
+  //   let errors = [];
+  //   let required = [
+  //     {
+  //       field: movie.title,
+  //       name: "title",
+  //     },
+  //     {
+  //       field: movie.release_date,
+  //       name: "release_date",
+  //     },
+  //     {
+  //       field: movie.runtime,
+  //       name: "runtime",
+  //     },
+  //     {
+  //       field: movie.description,
+  //       name: "description",
+  //     },
+  //     {
+  //       field: movie.mpaa_rating,
+  //       name: "mpaa_rating",
+  //     },
+  //   ];
+
+  //   required.forEach((req) => {
+  //     if (req.field === "") {
+  //       errors.push(req.name);
+  //     }
+  //   });
+
+  //   if (movie.genres_array.length === 0) {
+  //     alert("You must choose at least one genre.");
+  //     errors.push("genres");
+  //   }
+
+  //   setErrors(errors);
+
+  //   if (errors.length > 0) {
+  //     return false;
+  //   }
+
+  //   const headers = new Headers();
+  //   headers.append("Content-Type", "application/json");
+  //   headers.append("Authorization", "Bearer " + jwtToken);
+
+  //   const requestBody = movie;
+  //   requestBody.release_date = new Date(movie.release_date);
+  //   requestBody.runtime = parseInt(movie.runtime, 10);
+
+  //   let requestOptions = {
+  //     body: JSON.stringify(requestBody),
+  //     method: "PUT",
+  //     headers,
+  //     credentials: "include",
+  //   };
+
+  //   fetch("http://localhost:8080/admin/movies", requestOptions).then((resp) =>
+  //     resp
+  //       .json()
+  //       .then((data) => {
+  //         if (data.error) {
+  //           console.log(data.error);
+  //         } else {
+  //           navigate("/catalog");
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       })
+  //   );
+  // };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    let errors = [];
-    let required = [
-      {
-        field: movie.title,
-        name: "title",
-      },
-      {
-        field: movie.release_date,
-        name: "release_date",
-      },
-      {
-        field: movie.runtime,
-        name: "runtime",
-      },
-      {
-        field: movie.description,
-        name: "description",
-      },
-      {
-        field: movie.mpaa_rating,
-        name: "mpaa_rating",
-      },
+    // required fields validation
+    const requiredFields = [
+      { field: movie.title, name: "title" },
+      { field: movie.release_date, name: "release_date" },
+      { field: movie.runtime, name: "runtime" },
+      { field: movie.description, name: "description" },
+      { field: movie.mpaa_rating, name: "mpaa_rating" },
     ];
 
-    required.forEach((req) => {
-      if (req.field === "") {
-        errors.push(req.name);
-      }
-    });
+    const errors = requiredFields
+      .filter((req) => !req.field)
+      .map((req) => req.name);
 
     if (movie.genres_array.length === 0) {
       alert("You must choose at least one genre.");
       errors.push("genres");
     }
+
     setErrors(errors);
 
-    if (errors.length > 0) {
-      return false;
+    if (errors.length > 0) return;
+
+    try {
+      const headers = new Headers({
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      });
+
+      const requestBody = {
+        ...movie,
+        release_date: new Date(movie.release_date),
+        runtime: parseInt(movie.runtime, 10),
+      };
+
+      const response = await fetch("http://localhost:8080/admin/movies", {
+        method: "PUT",
+        headers,
+        credentials: "include",
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        console.error(data.error);
+      } else {
+        navigate("/movies");
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
     }
   };
 

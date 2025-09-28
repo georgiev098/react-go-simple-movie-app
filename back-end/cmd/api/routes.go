@@ -28,7 +28,9 @@ func (app *application) routes() http.Handler {
 		mux.Use(app.authRequired)
 		mux.Get("/movies", app.MovieCatalogue)
 		mux.Get("/movies/{id}", app.EditMovie)
+		mux.Patch("/movies/{id}", app.UpdateMovieById)
 		mux.Put("/movies", app.AddMovie)
+		mux.Delete("/movies/{id}", app.DeleteMovieById)
 	})
 	return mux
 }
