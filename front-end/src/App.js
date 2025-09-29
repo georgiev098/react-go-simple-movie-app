@@ -13,6 +13,7 @@ import EditMovie from "./components/EditMovie";
 import Movie from "./components/Movie";
 import { useEffect, useState } from "react";
 import PrivateRoute from "./components/PrivateRoute";
+import OneGenre from "./components/OneGenre";
 
 function App() {
   let navigate = useNavigate();
@@ -88,10 +89,11 @@ function App() {
             <Route path="/login" element={<Login onLogin={onLogin} />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id" element={<Movie />} />
+            <Route path="/genres" element={<Genres />} />
+            <Route path="/genres/:id" element={<OneGenre />} />
 
             {/* Private Routes */}
             <Route element={<PrivateRoute isAuthenticated={jwtToken} />}>
-              <Route path="/admin/genres" element={<Genres />} />
               <Route
                 path="/admin/add-movie"
                 element={<AddMovie jwtToken={jwtToken} />}

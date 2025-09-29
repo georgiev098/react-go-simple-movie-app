@@ -3,6 +3,7 @@ package dbrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/georgiev098/simple-go-react-movie-app/internal/models"
@@ -14,11 +15,16 @@ type PostgresDBRepo struct {
 	DB *sql.DB
 }
 
-func (m *PostgresDBRepo) AllMovies() ([]*models.Movie, error) {
+func (m *PostgresDBRepo) AllMovies(genre ...int) ([]*models.Movie, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DBTimeOut)
 	defer cancel()
 
-	query := `
+	where := ""
+	if len(genre) > 0 {
+		where = fmt.Sprintf("WHERE id IN (SELECT movie_id FROM movies_genres WHERE genre_id = %d)", genre[0])
+	}
+
+	query := fmt.Sprintf(`
 		SELECT 
 			id,
 			title,
@@ -29,9 +35,9 @@ func (m *PostgresDBRepo) AllMovies() ([]*models.Movie, error) {
 			COALESCE(image, ''),
 			created_at,
 			updated_at
-		FROM movies
+		FROM movies %s
 		ORDER BY title
-	`
+	`, where)
 
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
