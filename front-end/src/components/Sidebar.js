@@ -5,9 +5,9 @@ export default function Sidebar({ jwtToken }) {
     { name: "Home", path: "/" },
     { name: "Movies", path: "/movies" },
     { name: "Genres", path: "/genres" },
+    { name: "GraphQL", path: "/graphql" },
     { name: "Add Movie", path: "/admin/add-movie", private: true },
     { name: "Manage Catalogue", path: "/admin/catalogue", private: true },
-    { name: "GraphQL", path: "/admin/graphql", private: true },
   ];
 
   const visibleNavItems = navItems.filter(

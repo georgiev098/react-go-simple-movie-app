@@ -91,6 +91,7 @@ function App() {
             <Route path="/movies/:id" element={<Movie />} />
             <Route path="/genres" element={<Genres />} />
             <Route path="/genres/:id" element={<OneGenre />} />
+            <Route path="/graphql" element={<GraphQL />} />
 
             {/* Private Routes */}
             <Route element={<PrivateRoute isAuthenticated={jwtToken} />}>
@@ -106,7 +107,6 @@ function App() {
                 path="/admin/catalogue"
                 element={<Catalogue jwtToken={jwtToken} />}
               />
-              <Route path="/admin/graphql" element={<GraphQL />} />
             </Route>
             {/* END Private Routes */}
             <Route path="*" element={<ErrorPage />} />

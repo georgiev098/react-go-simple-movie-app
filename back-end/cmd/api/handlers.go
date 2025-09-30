@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/georgiev098/simple-go-react-movie-app/internal/graphql"
 	"github.com/georgiev098/simple-go-react-movie-app/internal/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"
@@ -360,4 +361,33 @@ func (app *application) GetMoviesByGenre(w http.ResponseWriter, r *http.Request)
 	}
 
 	app.writeJSON(w, http.StatusOK, movies)
+}
+
+func (app *application) MoviesGrapQL(w http.ResponseWriter, r *http.Request) {
+	// populate Graph type with movies
+
+	movies, _ := app.DB.AllMovies()
+
+	// get the query from request
+	q, _ := io.ReadAll(r.Body)
+	query := string(q)
+
+	// create new var *graph.Graph
+	g := graphql.New(movies)
+
+	// set query string
+	g.QueryString = query
+
+	//perform query
+	resp, err := g.Query()
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	// send response
+	j, _ := json.MarshalIndent(resp, "", "\t")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
 }
